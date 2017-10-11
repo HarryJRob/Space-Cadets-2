@@ -14,6 +14,15 @@ public class Lexer {
 		return tokenList;
 	}
 	
+	/*
+	 * Any number of tabs may come after a line terminator and before a command
+	 * Valid token strings:
+	 *  INCREMENT IDENTIFIER LINE_TERM
+	 *  DECREMENT IDENTIFIER LINE_TERM
+	 *  CLEAR IDENTIFIER LINE_TERM
+	 *  
+	 */
+	
 	private String identifyToken(String curToken) {
 		String returnStr = "ERROR";
 	    switch (curToken) {
