@@ -20,7 +20,7 @@ public class Lexer {
 	 *  INCREMENT IDENTIFIER LINE_TERM
 	 *  DECREMENT IDENTIFIER LINE_TERM
 	 *  CLEAR IDENTIFIER LINE_TERM
-	 *  
+	 *  WHILE IDENTIFIER NOT NUMBER DO LINE_TERM ... END LINE_TERM
 	 */
 	
 	private String identifyToken(String curToken) {

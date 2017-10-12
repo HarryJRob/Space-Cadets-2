@@ -1,9 +1,9 @@
 
 public class Token {
 
-	final String type;
-	final String additional;
-	final int tokenNum;
+	private final String type;
+	private final String additional;
+	private final int tokenNum;
 	
 	public Token(String type, String additional, int tokenNum) {
 		this.type = type;
@@ -11,7 +11,11 @@ public class Token {
 		this.tokenNum = tokenNum;
 	}
 	
-	public String toString() {
-		return type + " " + additional + " " + tokenNum;
+	public String getType() {
+		return type;
+	}
+	
+	public String getAdditional() {
+		return additional;
 	}
 }

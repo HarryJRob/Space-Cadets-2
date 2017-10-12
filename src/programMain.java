@@ -37,4 +37,24 @@ public class programMain {
 		return str;
 	}
 	
+	/*
+	 * Any number of tabs may come after a line terminator and before a command
+	 * Valid token strings:
+	 *  INCREMENT IDENTIFIER LINE_TERM
+	 *  DECREMENT IDENTIFIER LINE_TERM
+	 *  CLEAR IDENTIFIER LINE_TERM
+	 *  WHILE IDENTIFIER NOT NUMBER DO LINE_TERM ... END LINE_TERM
+	 */
+	
+	public static void processTokens(LinkedList<Token> tokenList) {
+		LinkedList<Variable> varList = new LinkedList<Variable>();
+		LinkedList<String> expectedTokens = new LinkedList<String>();
+		
+		for (int i = 0; i < tokenList.size(); i++) {
+			Token curToken = tokenList.get(i);
+			
+		}
+		
+	}
+	
 }
