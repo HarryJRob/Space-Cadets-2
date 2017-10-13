@@ -14,7 +14,7 @@ public class BareBones {
 		//interpret(file);
 		
 		if (args.length > 1) {
-			System.out.println("Usage: Space-Cadets-2 <path>");
+			System.out.println("Usage: BareBones <path>");
 		} else if (args.length == 1) {
 			String file = loadFile(args[0]);
 			interpret(file);
