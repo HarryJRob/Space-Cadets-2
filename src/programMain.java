@@ -9,8 +9,8 @@ public class programMain {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		//String file = loadFile("/Users/HJR/Desktop/test.txt"); //MAC
-		String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
+		String file = loadFile("/Users/HJR/Desktop/test.txt"); //MAC
+		//String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
 		interpret(file);
 		
 		//if (args.length > 1) {
@@ -60,6 +60,7 @@ public class programMain {
 	      case "end": returnStr = "END"; break;
 	      case ";" : returnStr = "LINE_TERM"; break;
 	      case "" : returnStr = "TAB"; break;
+	      while X not 0 do;
 	 */
 	
 	public static void interpret(String fileStr) {
@@ -81,7 +82,12 @@ public class programMain {
 						case "INCREMENT": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
 						case "DECREMENT": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
 						case "CLEAR": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
-						case "WHILE": break;
+						case "WHILE": expectedStack.add(new Variable("END"));
+							expectedStack.add(new Variable("LINE_TERM")); 
+							expectedStack.add(new Variable("DO")); 
+							expectedStack.add(new Variable("NUMBER"));
+							expectedStack.add(new Variable("NOT"));
+							expectedStack.add(new Variable("IDENTIFIER")); break;
 						case "NOT": break;
 						case "DO": break;
 						case "END": break;
