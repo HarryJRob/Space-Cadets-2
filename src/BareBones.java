@@ -4,21 +4,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class programMain {
+public class BareBones {
 	
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
 		//String file = loadFile("/Users/HJR/Desktop/test.txt"); //MAC
-		String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
-		interpret(file);
+		//String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
+		//interpret(file);
 		
-		//if (args.length > 1) {
-		//	System.out.println("Usage: Space-Cadets-2 <path>");
-		//} else if (args.length == 1) {
-		//	String file = loadFile(args[0]);
-		//	interpret(file);
-		//}
+		if (args.length > 1) {
+			System.out.println("Usage: Space-Cadets-2 <path>");
+		} else if (args.length == 1) {
+			String file = loadFile(args[0]);
+			interpret(file);
+		}
 	}
 	
 	public static String loadFile(String path) {
@@ -40,28 +40,6 @@ public class programMain {
 		
 		return str;
 	}
-	
-	/*
-	 * Any number of tabs may come after a line terminator and before a command
-	 * Valid token strings:
-	 *  INCREMENT IDENTIFIER LINE_TERM
-	 *  DECREMENT IDENTIFIER LINE_TERM
-	 *  CLEAR IDENTIFIER LINE_TERM
-	 *  WHILE IDENTIFIER NOT NUMBER DO LINE_TERM ... END LINE_TERM
-	 */
-	
-	/*
-	 * 	  case "incr": returnStr = "INCREMENT";  break;
-	      case "decr": returnStr = "DECREMENT";  break;
-	      case "clear": returnStr = "CLEAR";  break;
-	      case "while": returnStr = "WHILE"; break;
-	      case "not": returnStr = "NOT"; break;
-	      case "do": returnStr = "DO"; break;
-	      case "end": returnStr = "END"; break;
-	      case ";" : returnStr = "LINE_TERM"; break;
-	      case "" : returnStr = "TAB"; break;
-	      while X not 0 do;
-	 */
 	
 	public static void interpret(String fileStr) {
 		LinkedList<Variable> varList = new LinkedList<Variable>();
