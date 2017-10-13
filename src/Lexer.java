@@ -8,7 +8,9 @@ public class Lexer {
 		String[] splitFile = file.split(" ");
 		
 		for (int i = 0; i < splitFile.length; i++) {
-			tokenList.add(new Token(identifyToken(splitFile[i]),splitFile[i],lineNum));
+			Token t = new Token(identifyToken(splitFile[i]),splitFile[i],lineNum);
+			if (t.getType() != "TAB")
+				tokenList.add(t);
 		}
 		
 		return tokenList;

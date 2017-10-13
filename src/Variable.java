@@ -1,8 +1,8 @@
 
 public class Variable {
 
-	String identifier;
-	int Value;
+	private String identifier;
+	private int Value;
 	
 	public Variable(String identifier) {
 		this.identifier = identifier;
@@ -19,5 +19,13 @@ public class Variable {
 	
 	public void reset() {
 		Value = 0;
+	}
+	
+	public String getIdentifier() {
+		return identifier;
+	}
+	
+	public int getValue() {
+		return Value;
 	}
 }
