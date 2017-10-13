@@ -2,15 +2,15 @@ import java.util.*;
 
 public class Lexer {
 	
-	public LinkedList<Token> strToTokens(String file) {
+	public LinkedList<Token> strToTokens(String file, int lineNum) {
 		LinkedList<Token> tokenList = new LinkedList<Token>();
-		file = file.replaceAll(";", " ; ");
+		file = file.replaceAll(";", " ;");
 		String[] splitFile = file.split(" ");
 		
 		for (int i = 0; i < splitFile.length; i++) {
-			tokenList.add(new Token(identifyToken(splitFile[i]),splitFile[i],i));
-			System.out.println(identifyToken(splitFile[i])+" , \'"+splitFile[i]+"\' , "+i);
+			tokenList.add(new Token(identifyToken(splitFile[i]),splitFile[i],lineNum));
 		}
+		
 		return tokenList;
 	}
 	

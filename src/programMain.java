@@ -9,12 +9,15 @@ public class programMain {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		if (args.length > 1) {
-			System.out.println("Usage: Space-Cadets-2 <path>");
-		} else if (args.length == 1) {
-			String file = loadFile(args[0]);
-			LinkedList<Token> tokenList = myLex.strToTokens(file);
-		}
+		String file = loadFile("/Users/HJR/Desktop/test.txt");
+		interpret(file);
+		
+		//if (args.length > 1) {
+		//	System.out.println("Usage: Space-Cadets-2 <path>");
+		//} else if (args.length == 1) {
+		//	String file = loadFile(args[0]);
+		//	interpret(file);
+		//}
 	}
 	
 	public static String loadFile(String path) {
@@ -46,13 +49,37 @@ public class programMain {
 	 *  WHILE IDENTIFIER NOT NUMBER DO LINE_TERM ... END LINE_TERM
 	 */
 	
-	public static void processTokens(LinkedList<Token> tokenList) {
+	/*
+	 * 	      case "incr": returnStr = "INCREMENT";  break;
+	      case "decr": returnStr = "DECREMENT";  break;
+	      case "clear": returnStr = "CLEAR";  break;
+	      case "while": returnStr = "WHILE"; break;
+	      case "not": returnStr = "NOT"; break;
+	      case "do": returnStr = "DO"; break;
+	      case "end": returnStr = "END"; break;
+	      case ";" : returnStr = "LINE_TERM"; break;
+	      case "" : returnStr = "TAB"; break;
+	 */
+	
+	public static void interpret(String fileStr) {
 		LinkedList<Variable> varList = new LinkedList<Variable>();
-		LinkedList<String> expectedTokens = new LinkedList<String>();
+		Stack<Variable> expectedStack = new Stack<Variable>();
+		LinkedList<Token> curTokenList = new LinkedList<Token>();
 		
-		for (int i = 0; i < tokenList.size(); i++) {
-			Token curToken = tokenList.get(i);
+		fileStr = fileStr.replace(";",";:");
+		String[] lines = fileStr.split(":");
+		
+		for (int i = 0; i < lines.length; i++) {
+			System.out.println("Cur line: "+lines[i]);
+			curTokenList = myLex.strToTokens(fileStr, i);
 			
+			for (int a = 0; a< curTokenList.size(); a++) {
+				switch (curTokenList.get(a).getType()){
+					case "INCREMENT": break;
+				}
+			}
+			
+			curTokenList.clear();
 		}
 		
 	}

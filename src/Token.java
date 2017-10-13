@@ -3,12 +3,12 @@ public class Token {
 
 	private final String type;
 	private final String additional;
-	private final int tokenNum;
+	private final int lineNum;
 	
-	public Token(String type, String additional, int tokenNum) {
+	public Token(String type, String additional, int lineNum) {
 		this.type = type;
 		this.additional = additional;
-		this.tokenNum = tokenNum;
+		this.lineNum = lineNum;
 	}
 	
 	public String getType() {
@@ -17,5 +17,9 @@ public class Token {
 	
 	public String getAdditional() {
 		return additional;
+	}
+	
+	public int getLineNum() {
+		return lineNum;
 	}
 }
