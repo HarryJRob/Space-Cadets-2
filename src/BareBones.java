@@ -9,11 +9,7 @@ public class BareBones {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		//String file = loadFile("/Users/HJR/Desktop/test.txt"); //MAC
-		//String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
-		//interpret(file);
-		
-		if (args.length > 1) {
+		if (args.length != 1 ) {
 			System.out.println("Usage: BareBones <path>");
 		} else if (args.length == 1) {
 			String file = loadFile(args[0]);
@@ -57,7 +53,6 @@ public class BareBones {
 				curTokenList = myLex.strToTokens(lines[i], i);
 
 				for (int a = 0; a < curTokenList.size(); a++) {
-					//System.out.println("Current Token: " +curTokenList.get(a).getType());
 					if (expectedStack.size() == 0 || curTokenList.get(a).getType() == expectedStack.pop().getType()) {
 						switch (curTokenList.get(a).getType()){
 							case "INCREMENT": expectedStack.add(new Token("LINE_TERM","",i));
@@ -90,7 +85,6 @@ public class BareBones {
 								
 								LinkedList<Token> tempList = myLex.strToTokens(lines[lineNum], i);
 								if ( varList.get(findVarName(varList,tempList.get(1).getAdditional())).getValue() != Integer.valueOf(tempList.get(3).getAdditional()))  {
-									//System.out.println("Do repeat");
 									i = lineNum-1;
 								}
 								
@@ -112,10 +106,15 @@ public class BareBones {
 					} else { System.out.println("\nSyntax Error - " + i + "\n" + lines[i]); }
 					
 				}
-				printVarList(varList);
+
 				curTokenList.clear();
 			} else { System.out.println("\nError interpreting line: " + i + "\nStatement: " + lines[i] + "\n"); }
-
+			printVarList(varList);
+		}
+		if (loopStack.size() != 0) {
+			for (int i = 0; i < loopStack.size(); i++) {
+				System.out.println("\nError loop did not terminate: \n"+"Line: "+loopStack.get(i)+"\nStatement: "+lines[loopStack.get(i)]);
+			}
 		}
 	}
 	
@@ -127,7 +126,6 @@ public class BareBones {
 		}
 		
 		if (toAdd) {
-			//System.out.println("Adding variable: " + name);
 			list.add(new Variable(name));
 		}
 		
