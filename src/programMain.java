@@ -9,7 +9,8 @@ public class programMain {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		String file = loadFile("/Users/HJR/Desktop/test.txt");
+		//String file = loadFile("/Users/HJR/Desktop/test.txt"); //MAC
+		String file = loadFile("C:\\Users\\Harry\\Desktop\\Tests\\Bare_Bones.txt"); //PC
 		interpret(file);
 		
 		//if (args.length > 1) {
@@ -70,18 +71,34 @@ public class programMain {
 		String[] lines = fileStr.split(":");
 		
 		for (int i = 0; i < lines.length; i++) {
-			System.out.println("Cur line: "+lines[i]);
-			curTokenList = myLex.strToTokens(fileStr, i);
+			System.out.println("Current line: "+lines[i]);
 			
-			for (int a = 0; a< curTokenList.size(); a++) {
-				switch (curTokenList.get(a).getType()){
-					case "INCREMENT": break;
+			if (lines[i].matches("[ ]*((incr|decr|clear) [a-zA-Z]+|while [a-zA-Z]+ not [0-9]+ do|end);")) {
+				curTokenList = myLex.strToTokens(lines[i], i);
+
+				for (int a = 0; a < curTokenList.size(); a++) {
+					switch (curTokenList.get(a).getType()){
+						case "INCREMENT": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
+						case "DECREMENT": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
+						case "CLEAR": expectedStack.add(new Variable("LINE_TERM")); expectedStack.add(new Variable("IDENTIFIER")); break;
+						case "WHILE": break;
+						case "NOT": break;
+						case "DO": break;
+						case "END": break;
+						case "LINE_TERM": break;
+						case "TAB": break;
+						case "IDENTIFIER": break;
+						case "NUMBER": break;
+						default: System.out.println("\nError processing - Line No: "+i+" Statement: " + curTokenList.get(a).getAdditional());break;
+					}
 				}
-			}
 			
-			curTokenList.clear();
+				curTokenList.clear();
+			} else { System.out.println("\nError interpreting line: " + i + "\nStatement: " + lines[i] + "\n"); }
 		}
 		
 	}
+	
+
 	
 }
