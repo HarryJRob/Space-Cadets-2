@@ -17,7 +17,7 @@ public class Variable {
 		Value--;
 	}
 	
-	public void reset() {
+	public void clear() {
 		Value = 0;
 	}
 	

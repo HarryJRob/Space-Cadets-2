@@ -9,12 +9,12 @@ public class BareBones {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		if (args.length != 1 ) {
-			System.out.println("Usage: BareBones <path>");
-		} else if (args.length == 1) {
-			String file = loadFile(args[0]);
-			interpret(file);
-		}
+		interpret("");
+	//	if (args.length != 1 ) {
+	//		System.out.println("Usage: BareBones <path>");
+	//	} else if (args.length == 1) {
+	//		interpret(loadFile(args[0]));
+	//	}
 	}
 	
 	public static String loadFile(String path) {
@@ -39,83 +39,52 @@ public class BareBones {
 	
 	public static void interpret(String fileStr) {
 		LinkedList<Variable> varList = new LinkedList<Variable>();
-		Stack<Token> expectedStack = new Stack<Token>();
 		LinkedList<Token> curTokenList = new LinkedList<Token>();
 		Stack<Integer> loopStack = new Stack<Integer>(); // This is a bad way to do this! This could be done using expected stack 
-
+		fileStr = "incr X; clear X; incr X; incr X; decr X;";
 		fileStr = fileStr.replace(";",";:");
 		String[] lines = fileStr.split(":");
 		
 		for (int i = 0; i < lines.length; i++) {
 			System.out.println("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i]);
+			curTokenList = myLex.strToTokens(lines[i], i);
+			String tokenSyntax = getTokenSyntax(curTokenList).trim();
 			
-			if (lines[i].matches("[ ]*((incr|decr|clear) [a-zA-Z]+|while [a-zA-Z]+ not [0-9]+ do|end);")) {
-				curTokenList = myLex.strToTokens(lines[i], i);
-
-				for (int a = 0; a < curTokenList.size(); a++) {
-					if (expectedStack.size() == 0 || curTokenList.get(a).getType() == expectedStack.pop().getType()) {
-						switch (curTokenList.get(a).getType()){
-							case "INCREMENT": expectedStack.add(new Token("LINE_TERM","",i));
-								expectedStack.add(new Token("IDENTIFIER","",i));
-								break;
-							case "DECREMENT": expectedStack.add(new Token("LINE_TERM","",i));
-								expectedStack.add(new Token("IDENTIFIER","",i)); 
-								break;
-							case "CLEAR": expectedStack.add(new Token("LINE_TERM","",i));
-								expectedStack.add(new Token("IDENTIFIER","",i));
-								break;
-							case "WHILE": 							
-								expectedStack.add(new Token("LINE_TERM","",i)); 
-								expectedStack.add(new Token("DO","",i)); 
-								expectedStack.add(new Token("NUMBER","",i));
-								expectedStack.add(new Token("NOT","",i));
-								expectedStack.add(new Token("IDENTIFIER","",i)); 
-								
-								loopStack.add(i);
-							
-
-								break;
-							case "NOT": break;
-							case "DO": 
-								
-								break;
-							case "END": 
-								Integer lineNum = loopStack.pop(); 
-								//Not pretty
-								
-								LinkedList<Token> tempList = myLex.strToTokens(lines[lineNum], i);
-								if ( varList.get(findVarName(varList,tempList.get(1).getAdditional())).getValue() != Integer.valueOf(tempList.get(3).getAdditional()))  {
-									i = lineNum-1;
-								}
-								
-								expectedStack.add(new Token("LINE_TERM","",i)); break;
-							case "LINE_TERM": expectedStack.clear(); break;
-							case "IDENTIFIER": 
-								varList = posAddVariable(varList,curTokenList.get(a).getAdditional());
-								if (curTokenList.get(a-1).getType() == "INCREMENT") 
-									varList.get(findVarName(varList,curTokenList.get(a).getAdditional())).increment();
-								else if (curTokenList.get(a-1).getType() == "DECREMENT") 
-									varList.get(findVarName(varList,curTokenList.get(a).getAdditional())).decrement();
-								else if (curTokenList.get(a-1).getType() == "CLEAR") 
-									varList.get(findVarName(varList,curTokenList.get(a).getAdditional())).reset();
-								break;
-							case "NUMBER": break;
-							default: System.out.println("\nError processing - Line No: "+i+" Statement: " + curTokenList.get(a).getAdditional()); break;
-						}
-						
-					} else { System.out.println("\nSyntax Error - " + i + "\n" + lines[i]); }
-					
-				}
-
-				curTokenList.clear();
-			} else { System.out.println("\nError interpreting line: " + i + "\nStatement: " + lines[i] + "\n"); }
+			if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
+				posAddVariable(varList,curTokenList.get(1).getAdditional());
+				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).increment();
+				
+			} else if(tokenSyntax.matches("DECREMENT IDENTIFIER LINE_TERM")) {
+				posAddVariable(varList,curTokenList.get(1).getAdditional());
+				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).decrement();
+				
+			} else if(tokenSyntax.matches("CLEAR IDENTIFIER LINE_TERM")) {
+				posAddVariable(varList,curTokenList.get(1).getAdditional());
+				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).clear();
+				
+			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO LINE_TERM")) {
+				
+			} else if(tokenSyntax.matches("END LINE_TERM")) {
+				
+			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+i);}
+			
+			curTokenList.clear();
 			printVarList(varList);
 		}
+		
 		if (loopStack.size() != 0) {
 			for (int i = 0; i < loopStack.size(); i++) {
-				System.out.println("\nError loop did not terminate: \n"+"Line: "+loopStack.get(i)+"\nStatement: "+lines[loopStack.get(i)]);
+				System.out.println("\nError loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
 			}
 		}
+	}
+	
+	private static String getTokenSyntax(LinkedList<Token> tokenList) {
+		String returnStr = "";
+		for(int i = 0; i < tokenList.size();i++) {
+			returnStr += tokenList.get(i).getType()+" ";
+		}
+		return returnStr;
 	}
 	
 	private static LinkedList<Variable> posAddVariable(LinkedList<Variable> list,String name) {
