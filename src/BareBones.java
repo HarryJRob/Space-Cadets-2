@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class BareBones {
 	
@@ -40,13 +41,18 @@ public class BareBones {
 	public static void interpret(String fileStr) {
 		LinkedList<Variable> varList = new LinkedList<Variable>();
 		LinkedList<Token> curTokenList = new LinkedList<Token>();
-		Stack<Integer> loopStack = new Stack<Integer>(); // This is a bad way to do this! This could be done using expected stack 
-		fileStr = "incr X; clear X; incr X; incr X; decr X;";
+		Stack<Integer> loopStack = new Stack<Integer>();
+		
+		fileStr = "incr X; incr X; incr X; incr X; incr X; while X not 0 do; incr Y; decr X; end; incr Y; #Some comment; decr Y;";
+		
+		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*;", "");
 		fileStr = fileStr.replace(";",";:");
 		String[] lines = fileStr.split(":");
 		
+		System.out.println("-------------------------------------------\n              Program Start\n-------------------------------------------");
+		
 		for (int i = 0; i < lines.length; i++) {
-			System.out.println("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i]);
+			System.out.println("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i].trim());
 			curTokenList = myLex.strToTokens(lines[i], i);
 			String tokenSyntax = getTokenSyntax(curTokenList).trim();
 			
@@ -63,10 +69,21 @@ public class BareBones {
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).clear();
 				
 			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO LINE_TERM")) {
+				int endPos = getNextString("end;", i, lines);
+				if (endPos != -1) {
+					posAddVariable(varList,curTokenList.get(1).getAdditional());
+					if (varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).getValue() != 
+							Integer.valueOf(curTokenList.get(3).getAdditional()))
+					{ loopStack.add(i); }
+					else { i = endPos; }
+					
+				} else { System.out.println("Loop does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 				
 			} else if(tokenSyntax.matches("END LINE_TERM")) {
-				
-			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+i);}
+				if (loopStack.size() < 1 ) {
+					System.out.println("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
+				} else { i = loopStack.pop()-1; }
+			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 			
 			curTokenList.clear();
 			printVarList(varList);
@@ -77,6 +94,17 @@ public class BareBones {
 				System.out.println("\nError loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
 			}
 		}
+		
+		System.out.println("\n-------------------------------------------\n               Program end\n-------------------------------------------");
+	}
+	
+	private static int getNextString(String toFind,int curLine, String[] lines) {
+		for (int i = curLine; i < lines.length; i++) {
+			if (lines[i].trim().matches(toFind.trim())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	private static String getTokenSyntax(LinkedList<Token> tokenList) {
