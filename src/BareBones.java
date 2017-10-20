@@ -39,11 +39,14 @@ public class BareBones {
 	}
 	
 	public static void interpret(String fileStr) {
+		HashMap<String, Integer> subroutineMap = new HashMap<String, Integer>();
 		LinkedList<Variable> varList = new LinkedList<Variable>();
 		LinkedList<Token> curTokenList = new LinkedList<Token>();
 		Stack<Integer> loopStack = new Stack<Integer>();
+		Stack<Integer> callStack = new Stack<Integer>();
 		
-		fileStr = "incr X; incr X; incr X; incr X; incr X; while X not 0 do; incr Y; decr X; end; incr Y; #Some comment; decr Y;";
+		//String management stuff
+		fileStr = "incr X; incr X; incr X; incr X; incr X; while X not 0 do; incr Y; decr X; end; incr Y; #Some comment; decr Y; sub test; incr X; incr X; end sub; test; sub text; incr Y; test; end sub; text;";
 		
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*;", "");
 		fileStr = fileStr.replace(";",";:");
@@ -56,7 +59,23 @@ public class BareBones {
 			curTokenList = myLex.strToTokens(lines[i], i);
 			String tokenSyntax = getTokenSyntax(curTokenList).trim();
 			
-			if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
+			if (tokenSyntax.matches("SUBROUTINE IDENTIFIER LINE_TERM")) {
+				subroutineMap.put(curTokenList.get(1).getAdditional(), i);
+				int endPos = getNextString("end sub;",i,lines);
+				if (endPos != -1) {
+					i = endPos;
+				} else { System.out.println("Subroutine does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				
+			} else if (tokenSyntax.matches("SUBROUTINE_END LINE_TERM")) {
+				if (callStack.size() < 1 ) {
+					System.out.println("Unexpected sub end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
+				} else { i = callStack.pop(); }
+			} else if (tokenSyntax.matches("IDENTIFIER LINE_TERM")) {
+				if (subroutineMap.containsKey(curTokenList.get(0).getAdditional())) {
+					callStack.add(i);
+					i = subroutineMap.get(curTokenList.get(0).getAdditional());
+				}
+			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).increment();
 				
