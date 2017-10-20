@@ -1,23 +1,14 @@
-clear X;
-clear Y;
-clear Z;
-incr X;
-incr X;
-incr X;
-incr X;
-incr X;
-incr X;
+sub addTwo;
+    incr Two;
+    incr Two;
+end sub;
 
-while X not 0 do;
-   decr X;
-   clear Y;
-   incr Y;
-   incr Y;
-   incr Y;
-   incr Y;
-   incr Y;
-   while Y not 0 do;
-      decr Y;
-      incr Z;
-   end;
-end;
+#test comment
+
+addTwo;
+
+incr Two;
+clear Two;
+decr Two;
+
+	

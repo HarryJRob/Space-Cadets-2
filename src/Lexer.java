@@ -8,6 +8,7 @@ public class Lexer {
 		//String management stuff
 		file = file.replaceAll(";", " ;");
 		file = file.replaceAll("end sub", "end_sub");
+		file = file.replaceAll("end if", "end_if");
 		String[] splitFile = file.split(" ");
 		
 		for (int i = 0; i < splitFile.length; i++) {
@@ -31,14 +32,15 @@ public class Lexer {
 	      case "end": returnStr = "END"; break;
 	      case "if": returnStr = "IF"; break;
 	      case "else": returnStr = "ELSE"; break;
+	      case "end_if": returnStr = "ENDIF"; break;
 	      case "sub": returnStr = "SUBROUTINE"; break;
 	      case "end_sub": returnStr = "SUBROUTINE_END"; break;
-	      case ";" : returnStr = "LINE_TERM"; break;
-	      case "" : returnStr = "TAB"; break;
-	      default:
-	    	  if (curToken.matches("[+|/|*|-]")) {
+	      case ";": returnStr = "LINE_TERM"; break;
+	      case "": returnStr = "TAB"; break;
+	      default:   
+	    	  if (curToken.matches("([+]|[-]|[/]|[*])")) {
 	    		  returnStr = "OPERATOR";
-	    	  } else if (curToken.matches("[==|!=|<=|>=|>|<]")) {
+	    	  } else if (curToken.matches("(==|!=|<=|>=|>|<)")) {
 	    		  returnStr = "COMPARATOR";
 	    	  } else if (curToken.matches("[a-zA-Z]+")) {
 	    		  returnStr = "IDENTIFIER";

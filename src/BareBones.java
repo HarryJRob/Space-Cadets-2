@@ -1,9 +1,5 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class BareBones {
 	
@@ -26,7 +22,8 @@ public class BareBones {
 				BufferedReader in = new BufferedReader(new FileReader(path));
 				String curLine = "";
 				while (curLine != null) {
-					str += curLine;
+					if (curLine != "")
+					str += curLine + "\n";
 					curLine = in.readLine();
 				}
 			
@@ -46,11 +43,9 @@ public class BareBones {
 		Stack<Integer> callStack = new Stack<Integer>();
 		
 		//String management stuff
-		fileStr = "incr X; incr X; incr X; incr X; incr X; while X not 0 do; incr Y; decr X; end; incr Y; #Some comment; decr Y; sub test; incr X; incr X; end sub; test; sub text; incr Y; test; end sub; text;";
-		
-		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*;", "");
-		fileStr = fileStr.replace(";",";:");
-		String[] lines = fileStr.split(":");
+		fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X + 1 == X + 1;\n";
+		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
+		String[] lines = fileStr.split("\n");
 		
 		System.out.println("-------------------------------------------\n              Program Start\n-------------------------------------------");
 		
@@ -59,7 +54,10 @@ public class BareBones {
 			curTokenList = myLex.strToTokens(lines[i], i);
 			String tokenSyntax = getTokenSyntax(curTokenList).trim();
 			
-			if (tokenSyntax.matches("SUBROUTINE IDENTIFIER LINE_TERM")) {
+			//System.out.println(tokenSyntax);
+			if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?LINE_TERM")) {
+				
+			} else if (tokenSyntax.matches("SUBROUTINE IDENTIFIER LINE_TERM")) {
 				subroutineMap.put(curTokenList.get(1).getAdditional(), i);
 				int endPos = getNextString("end sub;",i,lines);
 				if (endPos != -1) {
@@ -70,11 +68,12 @@ public class BareBones {
 				if (callStack.size() < 1 ) {
 					System.out.println("Unexpected sub end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = callStack.pop(); }
+				
 			} else if (tokenSyntax.matches("IDENTIFIER LINE_TERM")) {
 				if (subroutineMap.containsKey(curTokenList.get(0).getAdditional())) {
 					callStack.add(i);
 					i = subroutineMap.get(curTokenList.get(0).getAdditional());
-				}
+				} else { System.out.println("Unidentified subroutine call: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).increment();
@@ -87,7 +86,7 @@ public class BareBones {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).clear();
 				
-			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO LINE_TERM")) {
+			} else if(tokenSyntax.matches("WHILE [IDENTIFIER|IDENTIFIER OPERATOR NUMBER|IDENTIFIER OPERATOR IDENTIFIER] NOT NUMBER DO LINE_TERM")) {
 				int endPos = getNextString("end;", i, lines);
 				if (endPos != -1) {
 					posAddVariable(varList,curTokenList.get(1).getAdditional());
@@ -102,6 +101,7 @@ public class BareBones {
 				if (loopStack.size() < 1 ) {
 					System.out.println("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = loopStack.pop()-1; }
+				
 			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 			
 			curTokenList.clear();
@@ -110,7 +110,7 @@ public class BareBones {
 		
 		if (loopStack.size() != 0) {
 			for (int i = 0; i < loopStack.size(); i++) {
-				System.out.println("\nError loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
+				System.out.println("Error loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
 			}
 		}
 		
