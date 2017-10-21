@@ -43,7 +43,7 @@ public class BareBones {
 		Stack<Integer> callStack = new Stack<Integer>();
 		
 		//String management stuff
-		fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X + 1 == X + 1;\n";
+		fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X + 1 == X;\n incr Z;\n end if;\n";
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
 		String[] lines = fileStr.split("\n");
 		
@@ -52,10 +52,82 @@ public class BareBones {
 		for (int i = 0; i < lines.length; i++) {
 			System.out.println("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i].trim());
 			curTokenList = myLex.strToTokens(lines[i], i);
-			String tokenSyntax = getTokenSyntax(curTokenList).trim();
-			
-			//System.out.println(tokenSyntax);
+			String tokenSyntax = myLex.getTokenSyntax(curTokenList).trim();
+
 			if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?LINE_TERM")) {
+				boolean ifResult = false;
+				{
+					String statement1 = "", statement2 = "", operator = "";
+				
+					if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER) LINE_TERM")) {
+						statement1 += curTokenList.get(1).getAdditional();
+						operator += curTokenList.get(2).getAdditional();
+						statement2 += curTokenList.get(3).getAdditional();
+					
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER) LINE_TERM")) {
+						statement1 += curTokenList.get(1).getAdditional() + " " + curTokenList.get(2).getAdditional() + " " + curTokenList.get(3).getAdditional(); 
+						operator += curTokenList.get(4).getAdditional();
+						statement2 += curTokenList.get(5).getAdditional();
+					
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )LINE_TERM")) {
+						statement1 += curTokenList.get(1).getAdditional();
+						operator += curTokenList.get(2).getAdditional();
+						statement2 += curTokenList.get(3).getAdditional() + " " + curTokenList.get(4).getAdditional() + " " + curTokenList.get(5).getAdditional();
+					
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )LINE_TERM")) {
+						statement1 += curTokenList.get(1).getAdditional() + " " + curTokenList.get(2).getAdditional() + " " + curTokenList.get(3).getAdditional(); 
+						operator += curTokenList.get(4).getAdditional();
+						statement2 += curTokenList.get(5).getAdditional() + " " + curTokenList.get(6).getAdditional() + " " + curTokenList.get(7).getAdditional();
+					
+					} else { System.out.println("If statement error: This should never be printed!!"); }
+
+					int valueOne = evaluateStatement(varList, statement1), valueTwo = evaluateStatement(varList,statement2);
+					
+					switch(operator) {
+						case "==": 
+							if (valueOne == valueTwo)
+								ifResult = true;
+							break;
+						case "!=": 
+							if (valueOne != valueTwo)
+								ifResult = true;
+							break;
+						case "<=": 
+							if (valueOne <= valueTwo)
+								ifResult = true;
+							break;
+						case ">=": 
+							if (valueOne >= valueTwo)
+								ifResult = true;
+							break;
+						case ">": 
+							if (valueOne > valueTwo)
+								ifResult = true;
+							break;
+						case "<": 
+							if (valueOne < valueTwo)
+								ifResult = true;
+							break;
+					}
+					
+					if (ifResult == false) {
+						int nextElse = getNextString("else;",i,lines);
+						int nextEndIf = getNextString("end if;",i,lines);
+						if (nextEndIf != -1) {
+							if (nextElse < nextEndIf && nextElse != -1) {
+								i = nextElse;
+							} else if (nextEndIf < nextElse || nextElse == -1) {
+								i = nextEndIf;
+							}
+						} else { System.out.println("If statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+					} 
+				}
+			} else if (tokenSyntax.matches("ELSE LINE_TERM")) {
+				if (getNextString("end if;",i,lines) != -1) {
+					i = getNextString("end if;",i,lines);
+				} else { System.out.println("Else statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				
+			} else if (tokenSyntax.matches("ENDIF LINE_TERM")) {
 				
 			} else if (tokenSyntax.matches("SUBROUTINE IDENTIFIER LINE_TERM")) {
 				subroutineMap.put(curTokenList.get(1).getAdditional(), i);
@@ -74,6 +146,7 @@ public class BareBones {
 					callStack.add(i);
 					i = subroutineMap.get(curTokenList.get(0).getAdditional());
 				} else { System.out.println("Unidentified subroutine call: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				
 			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).increment();
@@ -86,7 +159,7 @@ public class BareBones {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).clear();
 				
-			} else if(tokenSyntax.matches("WHILE [IDENTIFIER|IDENTIFIER OPERATOR NUMBER|IDENTIFIER OPERATOR IDENTIFIER] NOT NUMBER DO LINE_TERM")) {
+			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO LINE_TERM")) {
 				int endPos = getNextString("end;", i, lines);
 				if (endPos != -1) {
 					posAddVariable(varList,curTokenList.get(1).getAdditional());
@@ -126,14 +199,7 @@ public class BareBones {
 		return -1;
 	}
 	
-	private static String getTokenSyntax(LinkedList<Token> tokenList) {
-		String returnStr = "";
-		for(int i = 0; i < tokenList.size();i++) {
-			returnStr += tokenList.get(i).getType()+" ";
-		}
-		return returnStr;
-	}
-	
+	//Var Utils
 	private static LinkedList<Variable> posAddVariable(LinkedList<Variable> list,String name) {
 		boolean toAdd = true;
 		
@@ -161,5 +227,40 @@ public class BareBones {
 		for (int i = 0; i < list.size(); i++) {
 			System.out.println(list.get(i).getIdentifier() + " = " + list.get(i).getValue());
 		}
+	}
+	
+	private static int evaluateStatement(LinkedList<Variable> varList, String statement) {
+		String[] parts = statement.split(" ");
+		if (parts.length == 1) {
+			if (parts[0].matches("[a-zA-Z]+")) {
+				return varList.get(findVarName(varList,parts[0])).getValue();
+			} else if (parts[0].matches("[0-9.]+")) {
+				return Integer.parseInt(parts[0]);
+			}
+
+		} else if (parts.length == 3) {
+			int v1 = 0, v2 = 0;
+			
+			if (parts[0].matches("[a-zA-Z]+")) {
+				v1 = varList.get(findVarName(varList,parts[0])).getValue();
+			} else if (parts[0].matches("[0-9.]+")) {
+				v1 = Integer.parseInt(parts[0]);
+			}
+			
+			if (parts[2].matches("[a-zA-Z]+")) {
+				v2 = varList.get(findVarName(varList,parts[2])).getValue();
+			} else if (parts[2].matches("[0-9.]+")) {
+				v2 = Integer.parseInt(parts[2]);
+			}
+			
+			switch(parts[1]) {
+				case "+": return v1 + v2;
+				case "-": return v1 - v2;
+				case "*": return v1 * v2;
+				case "/": if (v2 != 0) { return v1 / v2; } else { return -1; }
+			}
+		}
+		
+		return -1;
 	}
 }

@@ -44,11 +44,19 @@ public class Lexer {
 	    		  returnStr = "COMPARATOR";
 	    	  } else if (curToken.matches("[a-zA-Z]+")) {
 	    		  returnStr = "IDENTIFIER";
-	    	  } else if (curToken.matches("[0-9]+")) {
+	    	  } else if (curToken.matches("[0-9.]+")) {
 	    		  returnStr = "NUMBER";
 	    	  }
 	    	  break;
 	    }
+		return returnStr;
+	}
+	
+	public String getTokenSyntax(LinkedList<Token> tokenList) {
+		String returnStr = "";
+		for(int i = 0; i < tokenList.size();i++) {
+			returnStr += tokenList.get(i).getType()+" ";
+		}
 		return returnStr;
 	}
 	
