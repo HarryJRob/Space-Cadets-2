@@ -1,14 +1,31 @@
-sub addTwo;
-    incr Two;
-    incr Two;
+incr X;
+incr X;
+incr X;
+incr X;
+incr X;
+while X not 0 do;
+  incr Y;
+  decr X;
+end;
+
+incr Y;
+#Some comment
+decr Y;
+
+sub Test;
+  incr X;
+  incr X;
 end sub;
 
-#test comment
+Test;
 
-addTwo;
+sub text;
+  incr Y;
+  Test;
+end sub;
 
-incr Two;
-clear Two;
-decr Two;
+text;
 
-	
+if X / X == 1;
+  incr Z;
+end if;

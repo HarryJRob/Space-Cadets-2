@@ -6,12 +6,12 @@ public class BareBones {
 	private static Lexer myLex = new Lexer();
 	
 	public static void main(String[] args) {
-		interpret("");
-	//	if (args.length != 1 ) {
-	//		System.out.println("Usage: BareBones <path>");
-	//	} else if (args.length == 1) {
-	//		interpret(loadFile(args[0]));
-	//	}
+		//interpret("");
+		if (args.length != 1 ) {
+			System.out.println("Usage: BareBones <path>");
+		} else if (args.length == 1) {
+			interpret(loadFile(args[0]));
+		}
 	}
 	
 	public static String loadFile(String path) {
@@ -43,7 +43,7 @@ public class BareBones {
 		Stack<Integer> callStack = new Stack<Integer>();
 		
 		//String management stuff
-		fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X + 1 == X;\n incr Z;\n end if;\n";
+		//fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X / X == 1;\n incr Z;\n end if;\n";
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
 		String[] lines = fileStr.split("\n");
 		
