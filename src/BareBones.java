@@ -174,7 +174,8 @@ public class BareBones {
 				if (loopStack.size() < 1 ) {
 					System.out.println("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = loopStack.pop()-1; }
-				
+			
+			} else if(tokenSyntax.matches("")) {
 			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 			
 			curTokenList.clear();
