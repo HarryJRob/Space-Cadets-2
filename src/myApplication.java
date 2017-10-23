@@ -1,8 +1,11 @@
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.LinkedList;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -68,7 +71,11 @@ public class myApplication extends Application {
 		buttonRun.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override public void handle(ActionEvent e) {
 		        //System.out.println("Button Run clicked");
-		        
+		        LinkedList<String> outputList = BareBones.interpret(textArea.getText());
+		        errorOutput.setText("");
+		        for (int i = 0; i < outputList.size(); i++) {
+		        		errorOutput.appendText(outputList.get(i) + "\n");
+		        }
 		    }
 		});
 		
@@ -87,7 +94,13 @@ public class myApplication extends Application {
 	}
 
 	private void saveFile() {
-		
+		try {
+			PrintWriter out = new PrintWriter(filePath);
+			out.write(textArea.getText());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private String loadFile() {

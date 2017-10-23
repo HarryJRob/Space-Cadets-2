@@ -4,38 +4,10 @@ import java.util.*;
 public class BareBones {
 	
 	private static Lexer myLex = new Lexer();
-	
-	public static void main(String[] args) {
-		//interpret("");
-		if (args.length != 1 ) {
-			System.out.println("Usage: BareBones <path>");
-		} else if (args.length == 1) {
-			interpret(loadFile(args[0]));
-		}
-	}
-	
-	public static String loadFile(String path) {
-		String str = "";
-		try {
-			File f = new File(path);
-			if(f.exists() && !f.isDirectory()) { 
-				BufferedReader in = new BufferedReader(new FileReader(path));
-				String curLine = "";
-				while (curLine != null) {
-					if (curLine != "")
-					str += curLine + "\n";
-					curLine = in.readLine();
-				}
-			
-				in.close();
-			} else { throw new IOException(); }
-
-		} catch (IOException e) { System.out.println("Invalid path entered"); System.exit(0); }
 		
-		return str;
-	}
-	
-	public static void interpret(String fileStr) {
+	public static LinkedList<String> interpret(String fileStr) {
+		LinkedList<String> outputList = new LinkedList<String>();
+		
 		HashMap<String, Integer> subroutineMap = new HashMap<String, Integer>();
 		LinkedList<Variable> varList = new LinkedList<Variable>();
 		LinkedList<Token> curTokenList = new LinkedList<Token>();
@@ -47,10 +19,10 @@ public class BareBones {
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
 		String[] lines = fileStr.split("\n");
 		
-		System.out.println("-------------------------------------------\n              Program Start\n-------------------------------------------");
+		outputList.add("-------------------------------------------\n              Program Start\n-------------------------------------------");
 		
 		for (int i = 0; i < lines.length; i++) {
-			System.out.println("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i].trim());
+			outputList.add("\nCurrent line: " + (i+1) + "\nStatement: "+lines[i].trim());
 			curTokenList = myLex.strToTokens(lines[i], i);
 			String tokenSyntax = myLex.getTokenSyntax(curTokenList).trim();
 
@@ -79,7 +51,7 @@ public class BareBones {
 						operator += curTokenList.get(4).getAdditional();
 						statement2 += curTokenList.get(5).getAdditional() + " " + curTokenList.get(6).getAdditional() + " " + curTokenList.get(7).getAdditional();
 					
-					} else { System.out.println("If statement error: This should never be printed!!"); }
+					} else { outputList.add("If statement error: This should never be printed!!"); }
 
 					int valueOne = evaluateStatement(varList, statement1), valueTwo = evaluateStatement(varList,statement2);
 					
@@ -119,13 +91,13 @@ public class BareBones {
 							} else if (nextEndIf < nextElse || nextElse == -1) {
 								i = nextEndIf;
 							}
-						} else { System.out.println("If statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+						} else { outputList.add("If statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 					} 
 				}
 			} else if (tokenSyntax.matches("ELSE LINE_TERM")) {
 				if (getNextString("end if;",i,lines) != -1) {
 					i = getNextString("end if;",i,lines);
-				} else { System.out.println("Else statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				} else { outputList.add("Else statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
 			} else if (tokenSyntax.matches("ENDIF LINE_TERM")) {
 				
@@ -134,18 +106,18 @@ public class BareBones {
 				int endPos = getNextString("end sub;",i,lines);
 				if (endPos != -1) {
 					i = endPos;
-				} else { System.out.println("Subroutine does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				} else { outputList.add("Subroutine does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
 			} else if (tokenSyntax.matches("SUBROUTINE_END LINE_TERM")) {
 				if (callStack.size() < 1 ) {
-					System.out.println("Unexpected sub end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
+					outputList.add("Unexpected sub end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = callStack.pop(); }
 				
 			} else if (tokenSyntax.matches("IDENTIFIER LINE_TERM")) {
 				if (subroutineMap.containsKey(curTokenList.get(0).getAdditional())) {
 					callStack.add(i);
 					i = subroutineMap.get(curTokenList.get(0).getAdditional());
-				} else { System.out.println("Unidentified subroutine call: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
+				} else { outputList.add("Unidentified subroutine call: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
 			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
@@ -168,27 +140,29 @@ public class BareBones {
 					{ loopStack.add(i); }
 					else { i = endPos; }
 					
-				} else { System.out.println("Loop does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
+				} else { outputList.add("Loop does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 				
 			} else if(tokenSyntax.matches("END LINE_TERM")) {
 				if (loopStack.size() < 1 ) {
-					System.out.println("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
+					outputList.add("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = loopStack.pop()-1; }
 			
 			} else if(tokenSyntax.matches("")) {
-			} else { System.out.println("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
+			} else { outputList.add("Invalid Syntax: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 			
 			curTokenList.clear();
-			printVarList(varList);
+			printVarList(varList, outputList);
 		}
 		
 		if (loopStack.size() != 0) {
 			for (int i = 0; i < loopStack.size(); i++) {
-				System.out.println("Error loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
+				outputList.add("Error loop did not terminate: \n"+"Line: " + loopStack.get(i) + "\nStatement: " + lines[loopStack.get(i)]);
 			}
 		}
 		
-		System.out.println("\n-------------------------------------------\n               Program end\n-------------------------------------------");
+		outputList.add("\n-------------------------------------------\n               Program end\n-------------------------------------------");
+		
+		return outputList;
 	}
 	
 	private static int getNextString(String toFind,int curLine, String[] lines) {
@@ -224,9 +198,9 @@ public class BareBones {
 		return -1;
 	}
 	
-	private static void printVarList(LinkedList<Variable> list) {
+	private static void printVarList(LinkedList<Variable> list, LinkedList<String> outputList) {
 		for (int i = 0; i < list.size(); i++) {
-			System.out.println(list.get(i).getIdentifier() + " = " + list.get(i).getValue());
+			outputList.add(list.get(i).getIdentifier() + " = " + list.get(i).getValue());
 		}
 	}
 	
