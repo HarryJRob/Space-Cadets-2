@@ -18,7 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class myApplication extends Application {
+public class BareBonesIDE extends Application {
 
 	private String filePath = "";
 	private TextField inputField = new TextField();
@@ -65,6 +65,7 @@ public class myApplication extends Application {
 		    @Override public void handle(ActionEvent e) {
 		        //System.out.println("Button Save clicked");
 		        filePath = inputField.getText();
+		        saveFile();
 		    }
 		});
 		
@@ -96,7 +97,9 @@ public class myApplication extends Application {
 	private void saveFile() {
 		try {
 			PrintWriter out = new PrintWriter(filePath);
+			System.out.println(textArea.getText());
 			out.write(textArea.getText());
+			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -119,7 +122,7 @@ public class myApplication extends Application {
 				in.close();
 			} else { throw new IOException(); }
 
-		} catch (IOException e) { errorOutput.appendText("Invalid path entered");}
+		} catch (IOException e) { errorOutput.setText("Invalid path entered");}
 		
 		return str;
 	}

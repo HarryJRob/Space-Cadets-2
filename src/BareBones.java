@@ -17,7 +17,9 @@ public class BareBones {
 		//String management stuff
 		//fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X / X == 1;\n incr Z;\n end if;\n";
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
-		String[] lines = fileStr.split("\n");
+		fileStr = fileStr.replaceAll("	", "");
+		fileStr = fileStr.replaceAll("\n", ";");
+		String[] lines = fileStr.split(";");
 		
 		outputList.add("-------------------------------------------\n              Program Start\n-------------------------------------------");
 		
@@ -26,27 +28,27 @@ public class BareBones {
 			curTokenList = myLex.strToTokens(lines[i], i);
 			String tokenSyntax = myLex.getTokenSyntax(curTokenList).trim();
 
-			if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?LINE_TERM")) {
+			if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )?")) {
 				boolean ifResult = false;
 				{
 					String statement1 = "", statement2 = "", operator = "";
 				
-					if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER) LINE_TERM")) {
+					if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER)")) {
 						statement1 += curTokenList.get(1).getAdditional();
 						operator += curTokenList.get(2).getAdditional();
 						statement2 += curTokenList.get(3).getAdditional();
 					
-					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER) LINE_TERM")) {
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER)")) {
 						statement1 += curTokenList.get(1).getAdditional() + " " + curTokenList.get(2).getAdditional() + " " + curTokenList.get(3).getAdditional(); 
 						operator += curTokenList.get(4).getAdditional();
 						statement2 += curTokenList.get(5).getAdditional();
 					
-					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )LINE_TERM")) {
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )")) {
 						statement1 += curTokenList.get(1).getAdditional();
 						operator += curTokenList.get(2).getAdditional();
 						statement2 += curTokenList.get(3).getAdditional() + " " + curTokenList.get(4).getAdditional() + " " + curTokenList.get(5).getAdditional();
 					
-					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )LINE_TERM")) {
+					} else if (tokenSyntax.matches("IF (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )COMPARATOR (IDENTIFIER|NUMBER) (OPERATOR (IDENTIFIER|NUMBER) )")) {
 						statement1 += curTokenList.get(1).getAdditional() + " " + curTokenList.get(2).getAdditional() + " " + curTokenList.get(3).getAdditional(); 
 						operator += curTokenList.get(4).getAdditional();
 						statement2 += curTokenList.get(5).getAdditional() + " " + curTokenList.get(6).getAdditional() + " " + curTokenList.get(7).getAdditional();
@@ -83,8 +85,8 @@ public class BareBones {
 					}
 					
 					if (ifResult == false) {
-						int nextElse = getNextString("else;",i,lines);
-						int nextEndIf = getNextString("end if;",i,lines);
+						int nextElse = getNextString("else",i,lines);
+						int nextEndIf = getNextString("end if",i,lines);
 						if (nextEndIf != -1) {
 							if (nextElse < nextEndIf && nextElse != -1) {
 								i = nextElse;
@@ -94,45 +96,45 @@ public class BareBones {
 						} else { outputList.add("If statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 					} 
 				}
-			} else if (tokenSyntax.matches("ELSE LINE_TERM")) {
-				if (getNextString("end if;",i,lines) != -1) {
-					i = getNextString("end if;",i,lines);
+			} else if (tokenSyntax.matches("ELSE")) {
+				if (getNextString("end if",i,lines) != -1) {
+					i = getNextString("end if",i,lines);
 				} else { outputList.add("Else statement does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
-			} else if (tokenSyntax.matches("ENDIF LINE_TERM")) {
+			} else if (tokenSyntax.matches("ENDIF")) {
 				
-			} else if (tokenSyntax.matches("SUBROUTINE IDENTIFIER LINE_TERM")) {
+			} else if (tokenSyntax.matches("SUBROUTINE IDENTIFIER")) {
 				subroutineMap.put(curTokenList.get(1).getAdditional(), i);
-				int endPos = getNextString("end sub;",i,lines);
+				int endPos = getNextString("end sub",i,lines);
 				if (endPos != -1) {
 					i = endPos;
 				} else { outputList.add("Subroutine does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
-			} else if (tokenSyntax.matches("SUBROUTINE_END LINE_TERM")) {
+			} else if (tokenSyntax.matches("SUBROUTINE_END")) {
 				if (callStack.size() < 1 ) {
 					outputList.add("Unexpected sub end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = callStack.pop(); }
 				
-			} else if (tokenSyntax.matches("IDENTIFIER LINE_TERM")) {
+			} else if (tokenSyntax.matches("IDENTIFIER")) {
 				if (subroutineMap.containsKey(curTokenList.get(0).getAdditional())) {
 					callStack.add(i);
 					i = subroutineMap.get(curTokenList.get(0).getAdditional());
 				} else { outputList.add("Unidentified subroutine call: \nLine: "+lines[i]+"\nLine Number: "+(i+1)); }
 				
-			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER LINE_TERM")) {
+			} else if(tokenSyntax.matches("INCREMENT IDENTIFIER")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).increment();
 				
-			} else if(tokenSyntax.matches("DECREMENT IDENTIFIER LINE_TERM")) {
+			} else if(tokenSyntax.matches("DECREMENT IDENTIFIER")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).decrement();
 				
-			} else if(tokenSyntax.matches("CLEAR IDENTIFIER LINE_TERM")) {
+			} else if(tokenSyntax.matches("CLEAR IDENTIFIER")) {
 				posAddVariable(varList,curTokenList.get(1).getAdditional());
 				varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).clear();
 				
-			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO LINE_TERM")) {
-				int endPos = getNextString("end;", i, lines);
+			} else if(tokenSyntax.matches("WHILE IDENTIFIER NOT NUMBER DO")) {
+				int endPos = getNextString("end", i, lines);
 				if (endPos != -1) {
 					posAddVariable(varList,curTokenList.get(1).getAdditional());
 					if (varList.get(findVarName(varList,curTokenList.get(1).getAdditional())).getValue() != 
@@ -142,7 +144,7 @@ public class BareBones {
 					
 				} else { outputList.add("Loop does not have terminator: \nLine: "+lines[i]+"\nLine Number: "+(i+1));}
 				
-			} else if(tokenSyntax.matches("END LINE_TERM")) {
+			} else if(tokenSyntax.matches("END")) {
 				if (loopStack.size() < 1 ) {
 					outputList.add("Unexpected end statement: \nLine: "+lines[i]+"\nLine Number: "+(i+1));
 				} else { i = loopStack.pop()-1; }

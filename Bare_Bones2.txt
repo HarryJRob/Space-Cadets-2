@@ -1,0 +1,1 @@
+while X not 50 do; incr X; end;
