@@ -46,7 +46,7 @@ public class BareBones {
 		//fileStr = "incr X;\n incr X;\n incr X;\n incr X;\n incr X;\n while X not 0 do;\n incr Y;\n decr X;\n end;\n incr Y;\n #Some comment\n decr Y;\n sub Test;\n incr X;\n incr X;\n end sub;\n Test;\n sub text;\n incr Y;\n Test;\n end sub;\n text;\n if X / X == 1;\n incr Z;\n end if;\n";
 		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");		fileStr = fileStr.replaceAll("#[ a-zA-Z0-9_-]*\n", "");
 		fileStr = fileStr.replaceAll("	", "");
-		fileStr = fileStr.replaceAll("\n", ";");
+		fileStr = fileStr.replaceAll("\n", "");
 		String[] lines = fileStr.split(";"); fileStr.split("\n");
 		
 		System.out.println("-------------------------------------------\n              Program Start\n-------------------------------------------");
